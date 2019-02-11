@@ -27,9 +27,11 @@
 void handleInterrupt21(int,int,int,int);
 void printString(char* string);
 void readString(char* buffer);
+void writeInt(int);
+void readInt(int *);
 void printLogo(); 
 
-void main()
+void main() 
 {
    makeInterrupt21();
    printLogo();
@@ -42,13 +44,13 @@ void printString(char* string, int x) {
 	char c = string[index];
 	if(x == 1) { 
 		while(c != 0) { 
-				interrupt(0x10, 0xE * 256 + c, 0, 0, 0);
-				c = string[++index];
+			interrupt(0x10, 0xE * 256 + c, 0, 0, 0);
+			c = string[++index];
 		}
 	} else { 
 		while(c != 0) { 
-				interrupt(0x17, 0xE * 256 + c, 0, 0, 0);
-				c = string[++index];
+			interrupt(0x17, 0xE * 256 + c, 0, 0, 0);
+			c = string[++index];
 		}
 	}
 }
@@ -67,12 +69,62 @@ void readString(char* string) {
 	string[index + 1] = 0;
 }
 
-void handleInterrupt21(int ax, int bx, int cx, int dx)
-{
+void readInt(int *number) {
+  int temp = 0;
+  int i = 0;
+  char line[6];
+  readString(line);
+  while (line[i] != '\0') {
+    temp = temp * 10 + line[i++] - '0';
+  }
+  *number = temp;
+}
+
+void writeInt(int x) {
+  char number[6], *d;
+  int q = x, r;
+  if (x < 1) {
+    d = number;
+    *d = 0x30;
+    d++;
+    *d = 0x0;
+    d--;
+  } else {
+    d = number + 5;
+    *d = 0x0;
+    d--;
+    while (q > 0) {
+      r = mod(q, 10);
+      q = div(q, 10);
+      *d = r + 48;
+      d--;
+    }
+    d++;
+  }
+  printString(d);
+}
+
+int mod(int a, int b) {
+  int x = a;
+  while (x >= b)
+    x = x - b;
+  return x;
+}
+
+int div(int a, int b) {
+  int q = 0;
+  while (q * b <= a)
+    q++;
+  return (q - 1);
+}
+
+void handleInterrupt21(int ax, int bx, int cx, int dx) {
     switch(ax) {  
     	/*return;*/ 
         case 0: printString(bx,cx); break; 
         case 1: readString(bx); break; 
+        case 13: writeInt(bx,cx); break; 
+        case 14: readInt(bx); break; 
         default: printString("General BlackDOS error.\r\n\0");
   }
 }
