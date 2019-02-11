@@ -1,0 +1,1 @@
+In lab1, we made our first blocks of our OS. We got to print using the BIOS and the interrrupt() function. I learned about the registers and how they are used. We used linux commands to compile our kernel, and link with the asm file for linking. Then we modfied the kernel to be able to print a string. 
